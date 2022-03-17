@@ -21,7 +21,7 @@ let nowPlaying;
 let status = 0;
 
 function preload() {
-  soundFormats('mp3', 'ogg');
+  soundFormats('mp3');
 
 
   for (let filename of image_filelist) {
@@ -117,9 +117,11 @@ function playsong() {
 
 
 function handleFile(file) {
-  print(file);
-  if (file.type === 'image') {
-    img = createImg(file.data);
-    img.hide();
+  if (file.type === 'audio') {
+   musiclist.push(loadSound(file))
+   imagelist.push(loadImage('images/remini.jpg'));
   }
 }
+
+
+
