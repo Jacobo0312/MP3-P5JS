@@ -19,6 +19,7 @@ let musiclist = [];
 let vol;
 let nowPlaying;
 let status = 0;
+//const fs = require('fs');  no definido
 
 function preload() {
   soundFormats('mp3');
@@ -32,10 +33,6 @@ function preload() {
     musiclist.push(loadSound(filename));
   }
 
-}
-
-function dataLoaded() {
-  
 }
 
 
@@ -127,5 +124,39 @@ function handleFile(file) {
   }
 }
 
+
+class Song {
+    
+  constructor(image, path){
+      this.image = loadImage(image);
+      this.song = loadSound(path);
+
+  }
+
+  playMusic(){
+      this.song.play();
+  }
+}
+
+class Playlist{
+
+  constructor(name, id){
+    this.name = name;
+    this.id = id;
+    this.songs = [];
+  }
+  
+  add(song){
+    this.songs.push(song);
+  }
+
+  play(index){
+    if (this.songs[index] != null && this.songs[index] instanceof Song){
+      this.songs[index].playMusic();
+    }
+
+  }
+
+}
 
 
