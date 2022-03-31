@@ -6,9 +6,13 @@ let nextButton;
 let prevButton;
 let inputFile;
 let mainList = [];  // list of all songs
-let playlist = [];  // list of playlist
+let playlist = [];  // list of 
+let nowList = [];
 let input;
 let status = false;
+const selectPlayList = document.getElementById('selectPlayList');
+const selectMusic = document.getElementById('selectMusic');
+const option = document.createElement('option');
 
 
 //************************************************************ */
@@ -67,18 +71,20 @@ function setup() {
     nextButton = createButton("⏭", 320, 320, 29, 29);
     prevButton = createButton("⏮", 40, 320, 29, 29);
     input = createFileInput(handleFile,0,0);
-    mainList.push(new Song('playlist/remini.mp3', 0));
+    selectPlayList.addEventListener("click", nowPlayList());
     dataLoad();
 
 
 }
 
 function dataLoad(){
-    if(mainList.length == 0){
+    nowList = mainList;
+
+    if(nowList.length == 0){
         nowPlaying = null;
 
     }else{
-        nowPlaying = mainList[0];
+        nowPlaying = nowList[0];
     }
 }
 
@@ -113,7 +119,7 @@ function next() {
     }
   
     nowPlaying.song.stop();
-    nowPlaying = mainList[index];
+    nowPlaying = nowList[index];
     nowPlaying.playMusic();
     print("next song is " + index);
 }
@@ -127,18 +133,18 @@ function prev() {
     }
 
     nowPlaying.song.stop();
-    nowPlaying = mainList[index];
+    nowPlaying = nowList[index];
     nowPlaying.playMusic();
     print("previous song is " + index);
 }
   
 function playsong() {
 
-    if(mainList.length == 0){
+    if(nowList.length == 0){
         nowPlaying = null;
 
     }else{
-        nowPlaying = mainList[0];
+        nowPlaying = nowList[0];
     }
 
     if (!status && nowPlaying != null) {
@@ -155,9 +161,22 @@ function playsong() {
 function handleFile(file) {
     if (file.type === 'audio') {
      mainList.push(new Song(file, mainList.length));
+     selectMusic.appendChild(document.createTextNode(mainList[mainList.length - 1].id));
 
-    
     }
+}
+
+function createPlayList(name, id){
+    let list = new Playlist(name, Playlist.length);
+    playlist.push(list);
+    option.setAttribute("value", id);
+    option.appendChild(document.createTextNode(list.name));
+    selectPlayList.appendChild(option);
+
+}
+
+function nowPlayList(){
+    nowList = playlist[0];
 }
 
 
