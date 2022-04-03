@@ -9,16 +9,25 @@
         <script src="lib/p5.touchgui.js"></script>
         <script src="lib/p5.sound.js"></script>
         <meta charset="utf-8">
+        <link rel="stylesheet" href="css/style.css">
     </head>
     <body>
-        <div>
-            <select id="selectPlayList"></select>
-            <select id="selectMusic"></select>
-            <button id="createPlayList">Crear una play list</button>
-            <input type="text" >hjhgjh</input>
+        
+        <div class="div-selectPlayList">
+            <select id="selectPlayList" class="selectPlayList" onchange="nowPlayList()">
+                <option value="0">PlayList principal</option>
+            </select>
         </div>
-      
+
+        <div class="div-selectMusic">
+            <input type="text" id="namePlaylist"></input>
+            <p>Seleccione una o mas opciones (presione la tecla ctrl para seleccion multiple) </p>
+            <select id="selectMusic" multiple></select><br><br>
+            <button id="createPlayList" onclick="createPlayList()">Crear una play list</button>
+        </div>
+        
         <script src="../src/ui/index2.js"></script>
+        
     </body>
 
 </html>

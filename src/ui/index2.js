@@ -12,7 +12,6 @@ let input;
 let status = false;
 const selectPlayList = document.getElementById('selectPlayList');
 const selectMusic = document.getElementById('selectMusic');
-const option = document.createElement('option');
 
 
 //************************************************************ */
@@ -29,6 +28,10 @@ class Song {
   
     playMusic(){
         this.song.play();
+    }
+
+    pauseMusic(){
+        this.song.pause();
     }
 }
   
@@ -71,21 +74,10 @@ function setup() {
     nextButton = createButton("⏭", 320, 320, 29, 29);
     prevButton = createButton("⏮", 40, 320, 29, 29);
     input = createFileInput(handleFile,0,0);
-    selectPlayList.addEventListener("click", nowPlayList());
-    dataLoad();
+    playlist.push(new Playlist("main", 0));
+    nowList = playlist[0].songs;
+    nowPlaying = null;
 
-
-}
-
-function dataLoad(){
-    nowList = mainList;
-
-    if(nowList.length == 0){
-        nowPlaying = null;
-
-    }else{
-        nowPlaying = nowList[0];
-    }
 }
 
 function draw() {
@@ -114,7 +106,7 @@ function draw() {
 function next() {
     let index = nowPlaying.id + 1;
   
-    if (index > imagelist.length - 1) {
+    if (index > nowList.length - 1) {
         index = 0;
     }
   
@@ -129,7 +121,7 @@ function prev() {
     let index = nowPlaying.id - 1;
 
     if (index < 0) {
-        index = imagelist.length - 1;
+        index = nowList.length - 1;
     }
 
     nowPlaying.song.stop();
@@ -140,43 +132,57 @@ function prev() {
   
 function playsong() {
 
-    if(nowList.length == 0){
-        nowPlaying = null;
-
-    }else{
+    if(nowPlaying == null){
         nowPlaying = nowList[0];
     }
 
     if (!status && nowPlaying != null) {
-      nowPlaying.playMusic();
-      status = true;
-    } else if (status && nowPlaying != null) {
-      status = false;
-      nowPlaying.playMusic();
-  
+        nowPlaying.playMusic();
+        status = true;
+    } else {
+        status = false;
+        nowPlaying.pauseMusic();
+    
     }
+
+   
   
 }
 
 function handleFile(file) {
     if (file.type === 'audio') {
-     mainList.push(new Song(file, mainList.length));
-     selectMusic.appendChild(document.createTextNode(mainList[mainList.length - 1].id));
+     playlist[0].songs.push(new Song(file, playlist[0].songs.length));
+     let option = document.createElement("option");
+     option.setAttribute("value", playlist[0].songs.length - 1);
+     option.innerHTML = file.name;
+     selectMusic.insertAdjacentElement("beforeend", option);
 
     }
 }
 
-function createPlayList(name, id){
-    let list = new Playlist(name, Playlist.length);
-    playlist.push(list);
-    option.setAttribute("value", id);
-    option.appendChild(document.createTextNode(list.name));
-    selectPlayList.appendChild(option);
+function createPlayList(){
 
+    let input = document.getElementById('namePlaylist');
+    let option = document.createElement("option");
+    let list = new Playlist(input.value, Playlist.length - 1);
+    input.value = "";
+
+    for (let i = 0; i < selectMusic.options.length; i++) {
+        if (selectMusic.options[i].selected === true) {
+            list.songs.push(playlist[0].songs[selectMusic.options[i].value]);
+            selectMusic.options[i].selected = false;
+        }  
+    }
+    
+    playlist.push(list);
+    option.setAttribute("value", list.id);
+    option.innerHTML = list.name;
+    selectPlayList.insertAdjacentElement("beforeend", option);
 }
 
 function nowPlayList(){
-    nowList = playlist[0];
+    console.log("nowPlayList");
+    nowList = playlist[selectPlayList.value].songs;
 }
 
 
