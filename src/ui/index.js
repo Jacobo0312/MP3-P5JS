@@ -1,162 +1,187 @@
+let vol;
+let nowPlaying;
 let gui;
 let play;
 let nextButton;
 let prevButton;
-let trackLoop;
-let listLoop;
-let randomPlay;
 let inputFile;
-let current_image = 1;
-
-//song list
-let image_filelist = ['images/remini.jpg', 'images/futile.jpg', 'images/rewrite.jpg'];
-//album cover
-let music_filelist = ['playlist/remini.mp3', 'playlist/futiledevices.mp3', 'playlist/raisedbed.mp3'];
-
-
-let imagelist = [];
-let musiclist = [];
-let vol;
-let nowPlaying;
-let status = 0;
-//const fs = require('fs');  no definido
-
-function preload() {
-  soundFormats('mp3');
+let playlist = [];  // list of 
+let nowList = [];
+let input;
+let status = false;
+const selectPlayList = document.getElementById('selectPlayList');
+const selectMusic = document.getElementById('selectMusic');
 
 
-  for (let filename of image_filelist) {
-    imagelist.push(loadImage(filename));
-  }
+//************************************************************ */
+//Clases
 
-  for (let filename of music_filelist) {
-    musiclist.push(loadSound(filename));
-  }
+class Song {
+    
+    constructor(path, id){
+        //this.image = loadImage(image);
+        this.song = loadSound(path);
+        this.id = id;
+    
+    }
+  
+    playMusic(){
+        this.song.play();
+    }
 
+    pauseMusic(){
+        this.song.pause();
+    }
+}
+  
+class Playlist{
+  
+    constructor(name, id){
+      this.name = name;
+      this.id = id;
+      this.songs = [];
+    }
+    
+    add(song){
+      this.songs.push(song);
+    }
+  
+    play(index){
+      if (this.songs[index] != null && this.songs[index] instanceof Song){
+        this.songs[index].playMusic();
+      }
+  
+    }
+  
 }
 
 
+//************************************************************ */
+
+
+function preload() {
+    soundFormats('mp3');
+    
+
+}
 
 function setup() {
-  createCanvas(400, 400);
-  gui = createGui();
-  vol = createSlider("volume", 40, 280, 310);
-  play = createButton("⏯", 180, 320, 29, 29);
-  nextButton = createButton("⏭", 320, 320, 29, 29);
-  prevButton = createButton("⏮", 40, 320, 29, 29);
-  randomPlay = createButton("🔀", 180, 360, 29, 29);
-  listLoop = createButton("🔁", 320, 360, 29, 29);
-  trackLoop = createButton("🔂", 40, 360, 29, 29);
-  input = createFileInput(handleFile,0,0);
-  
-  nowPlaying = musiclist[current_image];
-
+    createCanvas(400, 400);
+    gui = createGui();
+    vol = createSlider("volume", 40, 280, 310);
+    play = createButton("⏯", 180, 320, 29, 29);     
+    nextButton = createButton("⏭", 320, 320, 29, 29);
+    prevButton = createButton("⏮", 40, 320, 29, 29);
+    input = createFileInput(handleFile,0,0);
+    playlist.push(new Playlist("main", 0));
+    nowList = playlist[0].songs;
+    nowPlaying = null;
 
 }
 
 function draw() {
 
-  stroke('#000000');
-  fill(70);
-  strokeWeight(10);
-  rect(0, 0, 400, 400, 15);
-  drawGui();
-  image(imagelist[current_image], 75, 20, 250, 250);
-  if (prevButton.isPressed) {
-    prev();
-  }
-  if (nextButton.isPressed) {
-    next();
-  }
-  if (play.isPressed) {
-    playsong();
-  }
-  if (vol.isChanged) {
-    nowPlaying.setVolume(vol.val);
-  }
+    stroke('#000000');
+    fill(70);
+    strokeWeight(10);
+    rect(0, 0, 400, 400, 15);
+    drawGui();
 
-
+    if (vol.isChanged && nowPlaying != null) {
+        nowPlaying.song.setVolume(vol.val);
+    }
+    if (prevButton.isPressed) {
+        prev();
+    }
+    if (nextButton.isPressed) {
+        next();
+    }
+    if (play.isPressed) {
+        playsong();
+    }
+    
 }
 
 function next() {
-  current_image = current_image + 1;
-
-  if (current_image > imagelist.length - 1) {
-    current_image = 0;
-  }
-
-
-  nowPlaying.stop();
-  nowPlaying = musiclist[current_image];
-  nowPlaying.play();
-  print("next song is " + current_image);
-}
-
-
-function prev() {
-  current_image = current_image - 1;
-  if (current_image < 0) {
-    current_image = imagelist.length - 1;
-  }
-  nowPlaying.stop();
-  nowPlaying = musiclist[current_image];
-  nowPlaying.play();
-  print("previous song is " + current_image);
-}
-
-function playsong() {
-  if (status == 0) {
-    nowPlaying.play();
-    status = 1;
-  } else {
-    status = 0;
-    nowPlaying.pause();
-
-  }
-
-}
-
-
-function handleFile(file) {
-  if (file.type === 'audio') {
-   musiclist.push(loadSound(file))
-   imagelist.push(loadImage('images/remini.jpg'));
-  }
-}
-
-
-class Song {
-    
-  constructor(image, path){
-      this.image = loadImage(image);
-      this.song = loadSound(path);
-
-  }
-
-  playMusic(){
-      this.song.play();
-  }
-}
-
-class Playlist{
-
-  constructor(name, id){
-    this.name = name;
-    this.id = id;
-    this.songs = [];
-  }
+    let index = nowPlaying.id + 1;
   
-  add(song){
-    this.songs.push(song);
-  }
+    if (index > nowList.length - 1) {
+        index = 0;
+    }
+  
+    nowPlaying.song.stop();
+    nowPlaying = nowList[index];
+    nowPlaying.playMusic();
+    print("next song is " + index);
+}
+  
+  
+function prev() {
+    let index = nowPlaying.id - 1;
 
-  play(index){
-    if (this.songs[index] != null && this.songs[index] instanceof Song){
-      this.songs[index].playMusic();
+    if (index < 0) {
+        index = nowList.length - 1;
     }
 
-  }
-
+    nowPlaying.song.stop();
+    nowPlaying = nowList[index];
+    nowPlaying.playMusic();
+    print("previous song is " + index);
 }
+  
+function playsong() {
+
+    if(nowPlaying == null){
+        nowPlaying = nowList[0];
+    }
+
+    if (!status && nowPlaying != null) {
+        nowPlaying.playMusic();
+        status = true;
+    } else {
+        status = false;
+        nowPlaying.pauseMusic();
+    
+    }
+
+   
+  
+}
+
+function handleFile(file) {
+    if (file.type === 'audio') {
+     playlist[0].songs.push(new Song(file, playlist[0].songs.length));
+     let option = document.createElement("option");
+     option.setAttribute("value", playlist[0].songs.length - 1);
+     option.innerHTML = file.name;
+     selectMusic.insertAdjacentElement("beforeend", option);
+
+    }
+}
+
+function createPlayList(){
+
+    let input = document.getElementById('namePlaylist');
+    let option = document.createElement("option");
+    let list = new Playlist(input.value, Playlist.length - 1);
+    input.value = "";
+
+    for (let i = 0; i < selectMusic.options.length; i++) {
+        if (selectMusic.options[i].selected === true) {
+            list.songs.push(playlist[0].songs[selectMusic.options[i].value]);
+            selectMusic.options[i].selected = false;
+        }  
+    }
+    
+    playlist.push(list);
+    option.setAttribute("value", list.id);
+    option.innerHTML = list.name;
+    selectPlayList.insertAdjacentElement("beforeend", option);
+}
+
+function nowPlayList(){
+    nowList = playlist[selectPlayList.value].songs;
+}
+
 
 
