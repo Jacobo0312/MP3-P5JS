@@ -1,3 +1,14 @@
+let svg;
+
+//images
+let profile;
+let encanto;
+let encanto2;
+
+
+
+//
+let slider;
 let vol;
 let nowPlaying;
 let gui;
@@ -20,6 +31,7 @@ class Song {
     
     constructor(path, id){
         //this.image = loadImage(image);
+        this.path = path;
         this.song = loadSound(path);
         this.id = id;
     
@@ -31,6 +43,7 @@ class Song {
 
     pauseMusic(){
         this.song.pause();
+        
     }
 }
   
@@ -66,13 +79,23 @@ function preload() {
 }
 
 function setup() {
-    createCanvas(400, 400);
+    createCanvas(1920, 1080);
+    svg=loadImage('assets/Canva.svg');
+    encanto=loadImage('assets/encanto.svg');
+    encanto2=loadImage('assets/encanto2.svg');
+
     gui = createGui();
-    vol = createSlider("volume", 40, 280, 310);
-    play = createButton("⏯", 180, 320, 29, 29);     
-    nextButton = createButton("⏭", 320, 320, 29, 29);
-    prevButton = createButton("⏮", 40, 320, 29, 29);
+    vol = createSlider("volume",1119, 940,500, 30,);
+    slider = createSlider("slider",100, 985,1000, 30,);
+    slider.val = 0;
+    play = createButton("⏭", 1328, 985,83, 47,);
+    nextButton = createButton("⏭", 1328+200, 985,83, 47,);
+    prevButton = createButton("⏭", 1328-200, 985,83, 47,);
     input = createFileInput(handleFile,0,0);
+
+
+
+
     playlist.push(new Playlist("main", 0));
     nowList = playlist[0].songs;
     nowPlaying = null;
@@ -80,13 +103,29 @@ function setup() {
 }
 
 function draw() {
+    image(svg, 0, 0, 0, 0);
 
-    stroke('#000000');
-    fill(70);
-    strokeWeight(10);
-    rect(0, 0, 400, 400, 15);
+    image(encanto, 595, 208, 188, 190);
+
+    image(encanto2, 592, 579, 188, 190);
+
+    image(encanto, 1243, 180, 58, 58,);
+    image(encanto, 1243, 306, 58, 58,);
+    image(encanto, 1243, 684, 58, 58,);
+    image(encanto, 1243, 810, 58, 58,);
+    image(encanto, 1243, 432, 58, 58,);
+    image(encanto, 1243, 558, 58, 58,);
+
+
+    
+
+
     drawGui();
 
+    if (slider.isChanged && nowPlaying != null) {
+        nowPlaying.song.jump(slider.val, 0);
+
+    }
     if (vol.isChanged && nowPlaying != null) {
         nowPlaying.song.setVolume(vol.val);
     }
@@ -99,7 +138,26 @@ function draw() {
     if (play.isPressed) {
         playsong();
     }
-    
+    if(nowPlaying != null){
+        
+        if (Math.round(nowPlaying.song.currentTime()) == Math.round(nowPlaying.song.duration())) {
+            if (nowPlaying.id + 1 < nowList.length) {
+                next();
+            } 
+        }
+
+        sliderRoll();
+    }
+
+}
+
+function sliderRoll(){
+    if(nowPlaying.song.currentTime() >= slider.val){
+        slider.val = nowPlaying.song.currentTime();
+
+    }else if(slider.val > nowPlaying.song.currentTime()){
+        slider.val = nowPlaying.song.currentTime();
+    }
 }
 
 function next() {
@@ -110,8 +168,11 @@ function next() {
     }
   
     nowPlaying.song.stop();
+    nowPlaying.song.jump(0, 0);
+    
     nowPlaying = nowList[index];
-    nowPlaying.playMusic();
+    status = false;
+    playsong();
     print("next song is " + index);
 }
   
@@ -124,8 +185,10 @@ function prev() {
     }
 
     nowPlaying.song.stop();
+    nowPlaying.song.jump(0, 0);
     nowPlaying = nowList[index];
-    nowPlaying.playMusic();
+    status = false;
+    playsong();
     print("previous song is " + index);
 }
   
@@ -136,7 +199,12 @@ function playsong() {
     }
 
     if (!status && nowPlaying != null) {
+        console.log(slider.val);
+        slider.max = nowPlaying.song.duration();
+        vol.val = nowPlaying.song.getVolume();
+        sliderRoll();
         nowPlaying.playMusic();
+        console.log(slider.val);
         status = true;
     } else {
         status = false;
@@ -163,12 +231,13 @@ function createPlayList(){
 
     let input = document.getElementById('namePlaylist');
     let option = document.createElement("option");
-    let list = new Playlist(input.value, Playlist.length - 1);
+    let list = new Playlist(input.value, playlist.length);
     input.value = "";
 
     for (let i = 0; i < selectMusic.options.length; i++) {
         if (selectMusic.options[i].selected === true) {
-            list.songs.push(playlist[0].songs[selectMusic.options[i].value]);
+            let auxSong = new Song(playlist[0].songs[selectMusic.options[i].value].path, list.songs.length);
+            list.songs.push(auxSong);
             selectMusic.options[i].selected = false;
         }  
     }
@@ -181,6 +250,7 @@ function createPlayList(){
 
 function nowPlayList(){
     nowList = playlist[selectPlayList.value].songs;
+    nowPlaying = null;
 }
 
 

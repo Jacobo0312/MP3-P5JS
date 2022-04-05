@@ -2,13 +2,14 @@ div.div-selectPlayList{
     width: 50%;
     position: absolute;
     bottom: 37%;
+    left: 85%;
 }
 
 div.div-selectMusic{
     text-align: center;
     width: 50%;
     position: absolute;
-    left: 45%;
+    left: 70%;
     bottom: 60%;
     
 }
